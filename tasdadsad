@@ -1,0 +1,144 @@
+
+const System = Java.use('java.lang.System');
+const Runtime = Java.use('java.lang.Runtime');
+const SystemLoad_2 = System.loadLibrary.overload('java.lang.String');
+const VMStack = Java.use('dalvik.system.VMStack');
+
+System.loadLibrary.implementation = function(library) {
+	try { 
+		Runtime.getRuntime().loadLibrary0(VMStack.getCallingClassLoader(), library);
+		var base = Module.findBaseAddress("libbugsnag-ndk.so");
+		//var base = Module.findBaseAddress("libbugsnag-root-detection.so");
+		//console.log("Base : "+base);
+			Interceptor.attach(base.add(0xA65C0), { // hooking bypass
+				onEnter: function (args) {
+
+					var check = this.context.x0;
+					console.log(check);
+					//console.log(check);
+					if(check == 0){
+						
+						this.context.x0 = 1;
+						console.log(check);
+						
+					}
+			}}); 
+		
+	} catch(ex) {
+		// console.log(ex);
+	}
+}; 
+
+/*
+Interceptor.attach(Module.findExportByName(null, 'fread'), {
+   onEnter: function(args) {
+   //console.log('[*] ============= '+Memory.readCString(args[1]));
+   //args[0].toInt32()
+
+	var library_path = Memory.readCString(args[0]);
+	//console.log("[F] Fopen library : " + library_path);
+    
+    if(library_path.indexOf("frida") !== -1){ //|| library_path.indexOf("sbin") !== -1 
+	//|| library_path.indexOf("magisk") !== -1 || library_path.indexOf("rooting") !== -1
+	//|| library_path.indexOf("xbin") !== -1 || library_path.indexOf("nosu") !== -1 
+	//|| library_path.indexOf("RootTools") !== -1 || library_path.indexOf("su") !== -1
+	//|| library_path.indexOf("USB") !== -1 ) {
+       
+		console.log("[F] Fopen library : " + library_path);
+		
+        //Memory.protect(args[0], 16, 'rwx');
+        //Memory.writeUtf8String(args[0], "ffffff");
+		//console.log(library_path);
+		//console.log("[S] frida bypass ");
+		//console.log("\x1b[32m\nBackyutrace:\n" + Thread.backtrace(this.context, Backtracer.ACCURATE).map(DebugSymbol.fromAddress).join("\n"));
+		
+    }
+      
+   },
+    onLeave: function(retval){
+   }
+
+})
+*/
+/*
+Interceptor.attach(Module.findExportByName(null, 'kill'), {
+   onEnter: function(args) {
+	console.log('[*] KILL Call ');
+	args[0] = ptr(0x1234);
+
+   },
+    onLeave: function(retval){
+   }
+
+})
+*/
+/*
+//백트레이스 코드
+Interceptor.attach(Module.findExportByName(null, 'fopen'), {
+   onEnter: function(args) {
+   //console.log('[*] ============= '+Memory.readCString(args[1]));
+   //args[0].toInt32()
+
+	var library_path = Memory.readCString(args[0]);
+	
+	console.log("[F] Fopen library : " + library_path);
+	
+    //if(library_path.indexOf("frida") !== -1){ //|| library_path.indexOf("sbin") !== -1 
+	//|| library_path.indexOf("magisk") !== -1 || library_path.indexOf("rooting") !== -1
+	//|| library_path.indexOf("xbin") !== -1 || library_path.indexOf("nosu") !== -1 
+	//|| library_path.indexOf("RootTools") !== -1 || library_path.indexOf("su") !== -1
+	//|| library_path.indexOf("USB") !== -1 ) {
+        //console.log("[F] Fopen library : " + library_path);
+        //Memory.protect(args[0], 16, 'rwx');
+        //Memory.writeUtf8String(args[0], "ffffff");
+		//console.log(library_path);
+		//console.log("[S] frida bypass ");
+		//console.log("\x1b[32m\nBackyutrace:\n" + Thread.backtrace(this.context, Backtracer.ACCURATE).map(DebugSymbol.fromAddress).join("\n"));
+		
+    //}
+	
+      
+   },
+    onLeave: function(retval){
+   }
+
+})
+*/
+/*
+function nativeTrace(nativefunc) {
+    var nativefunc_addr=Module.getExportByName(null, nativefunc) 
+    var func=ptr(nativefunc_addr);
+    
+    Interceptor.attach(func, {
+        // set hook 
+        onEnter: function (args) { 
+            console.warn("\n[+] " + nativefunc + " called"); // before call 
+            if (nativefunc == "fopen") { 
+                if(args[0].readUtf8String() == "/proc/self/maps"){
+                    Memory.protect(args[0], 16, 'rwx');
+					args[0].writeUtf8String("/proc/self/stat");
+                }
+                console.log("\n\x1b[31margs[0]:\x1b[0m \x1b[34m" + args[0].readUtf8String() + ", \x1b[32mType: "); 
+            } 
+        }, 
+        onLeave: function (retval) { 
+            if(nativefunc == "fopen"){ 
+                console.warn("[-] " + nativefunc + " ret: " + retval.toString() ); // after call 
+            } 
+        } 
+    }); 
+} 
+
+nativeTrace("fopen");
+*/
+
+//보이드 처리 코드
+/*
+var base = Module.findBaseAddress("libbugsnag-ndk.so");
+var add_base = base.add(0x58038);
+
+Interceptor.replace(add_base, new nativeCallback(function(){
+	console.log("[.] replace void");
+	
+}, "void", []));
+*/
