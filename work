@@ -1,3 +1,15 @@
+탐지 하는 것들
+
+/sbin/su - 완
+/sbin/magisk - 완
+/sbin/.magisk - 완
+/sbin/magiskinit - 완
+
+USB Debugging - 우회 - 완
+
+com.topjohnnwu.magisk 차례
+
+
 setTimeout(function() {
     Java.perform(function() {
         var androidSettings = ['adb_enabled'];
