@@ -1,0 +1,436 @@
+setTimeout(function() {
+    Java.perform(function() {
+        var androidSettings = ['adb_enabled'];
+        var sdkVersion = Java.use('android.os.Build$VERSION');
+        console.log("SDK Version : " + sdkVersion.SDK_INT.value);
+
+        /* API 16 or lower Settings.Global Hook */
+        if (sdkVersion.SDK_INT.value <= 16) {
+            var settingSecure = Java.use('android.provider.Settings$Secure');
+
+            settingSecure.getInt.overload('android.content.ContentResolver', 'java.lang.String').implementation = function(cr, name) {
+                //console.log("[*]settingSecure.getInt(cr,name) : " + name);
+                if (name == androidSettings[0]) {
+                    console.log('[+]Secure.getInt(cr, name) Bypassed');
+                    return 0;
+                }
+                var ret = this.getInt(cr, name);
+                return ret;
+            }
+
+            settingSecure.getInt.overload('android.content.ContentResolver', 'java.lang.String', 'int').implementation = function(cr, name, def) {
+                //console.log("[*]settingSecure.getInt(cr,name,def) : " + name);
+                if (name == (androidSettings[0])) {
+                    console.log('[+]Secure.getInt(cr, name, def) Bypassed');
+                    return 0;
+                }
+                var ret = this.getInt(cr, name, def);
+                return ret;
+            }
+
+            settingSecure.getFloat.overload('android.content.ContentResolver', 'java.lang.String').implementation = function(cr, name) {
+                //console.log("[*]settingSecure.getFloat(cr,name) : " + name);
+                if (name == androidSettings[0]) {
+                    console.log('[+]Secure.getFloat(cr, name) Bypassed');
+                    return 0;
+                }
+                var ret = this.getFloat(cr, name)
+                return ret;
+            }
+
+            settingSecure.getFloat.overload('android.content.ContentResolver', 'java.lang.String', 'float').implementation = function(cr, name, def) {
+                //console.log("[*]settingSecure.getFloat(cr,name,def) : " + name);
+                if (name == androidSettings[0]) {
+                    console.log('[+]Secure.getFloat(cr, name, def) Bypassed');
+                    return 0;
+                }
+                var ret = this.getFloat(cr, name, def);
+                return ret;
+            }
+
+            settingSecure.getLong.overload('android.content.ContentResolver', 'java.lang.String').implementation = function(cr, name) {
+                //console.log("[*]settingSecure.getLong(cr,name) : " + name);
+                if (name == androidSettings[0]) {
+                    console.log('[+]Secure.getLong(cr, name) Bypassed');
+                    return 0;
+                }
+                var ret = this.getLong(cr, name)
+                return ret;
+            }
+
+            settingSecure.getLong.overload('android.content.ContentResolver', 'java.lang.String', 'long').implementation = function(cr, name, def) {
+                //console.log("[*]settingSecure.getLong(cr,name,def) : " + name);
+                if (name == androidSettings[0]) {
+                    console.log('[+]Secure.getLong(cr, name, def) Bypassed');
+                    return 0;
+                }
+                var ret = this.getLong(cr, name, def);
+                return ret;
+            }
+
+            settingSecure.getString.overload('android.content.ContentResolver', 'java.lang.String').implementation = function(cr, name) {
+                //console.log("[*]settingSecure.getString(cr,name) : " + name);
+                if (name == androidSettings[0]) {
+                    var stringClass = Java.use("java.lang.String");
+                    var stringInstance = stringClass.$new("0");
+
+                    console.log('[+]Secure.getString(cr, name) Bypassed');
+                    return stringInstance;
+                }
+                var ret = this.getString(cr, name);
+                return ret;
+            }
+        }
+
+        /* API 17 or higher Settings.Global Hook */
+        if (sdkVersion.SDK_INT.value >= 17) {
+            var settingGlobal = Java.use('android.provider.Settings$Global');
+
+            settingGlobal.getInt.overload('android.content.ContentResolver', 'java.lang.String').implementation = function(cr, name) {
+                //console.log("[*]settingGlobal.getInt(cr,name) : " + name);
+                if (name == androidSettings[0]) {
+                    console.log('[+]Global.getInt(cr, name) Bypassed');
+                    return 0;
+                }
+                var ret = this.getInt(cr, name);
+                return ret;
+            }
+
+            settingGlobal.getInt.overload('android.content.ContentResolver', 'java.lang.String', 'int').implementation = function(cr, name, def) {
+                //console.log("[*]settingGlobal.getInt(cr,name,def) : " + name);
+                if (name == (androidSettings[0])) {
+                    console.log('[+]Global.getInt(cr, name, def) Bypassed');
+                    return 0;
+                }
+                var ret = this.getInt(cr, name, def);
+                return ret;
+            }
+
+            settingGlobal.getFloat.overload('android.content.ContentResolver', 'java.lang.String').implementation = function(cr, name) {
+                //console.log("[*]settingGlobal.getFloat(cr,name) : " + name);
+                if (name == androidSettings[0]) {
+                    console.log('[+]Global.getFloat(cr, name) Bypassed');
+                    return 0;
+                }
+                var ret = this.getFloat(cr, name);
+                return ret;
+            }
+
+            settingGlobal.getFloat.overload('android.content.ContentResolver', 'java.lang.String', 'float').implementation = function(cr, name, def) {
+                //console.log("[*]settingGlobal.getFloat(cr,name,def) : " + name);
+                if (name == androidSettings[0]) {
+                    console.log('[+]Global.getFloat(cr, name, def) Bypassed');
+                    return 0;
+                }
+                var ret = this.getFloat(cr, name, def);
+                return ret;
+            }
+
+            settingGlobal.getLong.overload('android.content.ContentResolver', 'java.lang.String').implementation = function(cr, name) {
+                //console.log("[*]settingGlobal.getLong(cr,name) : " + name);
+                if (name == androidSettings[0]) {
+                    console.log('[+]Global.getLong(cr, name) Bypassed');
+                    return 0;
+                }
+                var ret = this.getLong(cr, name);
+                return ret;
+            }
+
+            settingGlobal.getLong.overload('android.content.ContentResolver', 'java.lang.String', 'long').implementation = function(cr, name, def) {
+                //console.log("[*]settingGlobal.getLong(cr,name,def) : " + name);
+                if (name == androidSettings[0]) {
+                    console.log('[+]Global.getLong(cr, name, def) Bypassed');
+                    return 0;
+                }
+                var ret = this.getLong(cr, name, def);
+                return ret;
+            }
+
+            settingGlobal.getString.overload('android.content.ContentResolver', 'java.lang.String').implementation = function(cr, name) {
+                //console.log("[*]settingGlobal.getString(cr,name) : " + name);
+                if (name == androidSettings[0]) {
+                    var stringClass = Java.use("java.lang.String");
+                    var stringInstance = stringClass.$new("0");
+
+                    console.log('[+]Global.getString(cr, name) Bypassed');
+                    return stringInstance;
+                }
+                var ret = this.getString(cr, name);
+                return ret;
+            }
+        }
+    });
+}, 0);
+
+
+setTimeout(function(){
+	Java.perform(function(){
+		
+		console.log("JAVA IO started");
+		
+		/** File **/		
+		var file = Java.use("java.io.File");
+		file.$init.overload("java.lang.String").implementation = function(path){
+			console.log("[*] New File Instance Created using path: " + path);
+			return file.$init.overload("java.lang.String").call(this, path);
+		}
+		file.$init.overload("java.io.File", "java.lang.String").implementation = function(fileObject, path){
+			console.log("[*] New File Instance Created using parent object: " + fileObject.toString() + " using child path: " + path );
+			return file.$init.overload("java.io.File", "java.lang.String").call(this, fileObject, path);
+		}
+		file.$init.overload("java.lang.String", "java.lang.String").implementation = function(parent, path){
+			console.log("[*] New File Instance Created using parent path: " + parent + " using child path: " + path );
+			return file.$init.overload("java.lang.String", "java.lang.String").call(this, parent, path);
+		}
+		file.$init.overload("java.net.URI").implementation = function(neturi){
+			console.log("[*] New File Instance Created using URI: " + neturi.toString());
+			return file.$init.overload("java.net.URI").call(this, neturi);
+		}
+
+		/** InputStream **/
+		
+		var is = Java.use("java.io.InputStream");
+		
+		// InputStream.read()
+		is.read.overload().implementation = function(){
+			ret = is.read.overload().call(this);
+			console.log("InputStream.read()");
+			return ret;
+		}
+		
+		// InputStream.read(bytes)
+		is.read.overload("[B").implementation = function(bArr){
+			ret = is.read.overload("[B").call(this, bArr);
+			console.log("InputStream.read([] byte) called ("+ret+")");
+			return ret;
+		}
+		
+		// InputStream.read(bytes)
+		is.read.overload("[B", "int", "int").implementation = function(bArr, offset, dataLen){
+			ret = is.read.overload("[B", "int", "int").call(this, bArr, offset, dataLen);
+			console.log("InputStream.read(byte[], offset: "+offset+", len: "+dataLen+") called");
+			return ret;
+		}
+		
+		/** OutputStream **/
+		 
+		var out = Java.use("java.io.OutputStream");
+		
+		// OutputStream.write(i)
+		out.write.overload("int").implementation = function(i){
+			console.log("OutputStream.write(int)");
+			out.write.overload("int").call(this,i);
+		}
+		
+		// OutputStream.write(byte[])
+		out.write.overload("[B").implementation = function(bArr){
+			try{
+				console.log("OutputStream.write(byte[]) ("+bArr.length+")");
+			}catch(e){
+				console.log("OutputStream.write(byte[]) ("+bArr.value.length+")");
+			}
+			out.write.overload("[B").call(this,bArr);
+		}
+		
+		// OutputStream.write(byte[], off, len)
+		out.write.overload("[B", "int", "int").implementation = function(bArr, offset, len){
+			console.log("OutputStream.write(byte[], offset: "+offset+", len: "+len+")");
+			out.write.overload("[B", "int", "int").call(this,bArr, offset, len);
+		}
+		
+		/** GZIP IO **/
+		
+		var gzout = Java.use("java.util.zip.GZIPOutputStream");
+		
+		gzout.write.overload("[B", "int", "int").implementation = function(bArr, offset, len){
+			console.log("GZIPOutputStream.write(byte[], offset: "+offset+", len: "+len+")");
+			gzout.write.overload("[B", "int", "int").call(this,bArr, offset, len);
+		}
+		
+		var gzin = Java.use("java.util.zip.GZIPInputStream");
+		
+		gzin.read.overload("[B", "int", "int").implementation = function(bArr, offset, len){
+			console.log("GZIPInputStream.read(byte[], offset: "+offset+", len: "+len+")");
+			gzin.read.overload("[B", "int", "int").call(this,bArr, offset, len);
+		}
+		
+		/** StringBuilder **/
+		
+		var strbld = Java.use("java.lang.StringBuilder");
+		
+		strbld.toString.overload().implementation = function(){
+			var ret = strbld.toString.overload().call(this);
+			if (ret != "Master enabled = true")
+				console.log("StringBuilder.toString(): " + ret);
+			return ret;
+		}
+
+		/** String concat **/
+		
+		var str = Java.use("java.lang.String");
+		str.concat.overload("java.lang.String").implementation = function(strval){
+			var ret = str.concat.overload("java.lang.String").call(this, strval);
+			console.log("concat(" + strval + "): " + ret);
+			return ret;
+		}
+		
+		
+	});
+},0);
+
+//문자열 바꿔버리는 코드
+/*
+Interceptor.attach(Module.findExportByName(null, 'dlopen'), {
+   onEnter: function(args) {
+	//console.log("exit : "+Memory.readCString(args[0]));
+	var library_path = Memory.readCString(args[0]);
+	Memory.protect(args[0], 16, 'rwx');
+    console.log(Memory.readUtf8String(args[0]));
+    //if(library_path.indexOf("frida") != -1 || library_path.indexOf("/sbin/su") != -1 || library_path.indexOf("magisk") != -1) {
+	//if(library_path.indexOf("frida") != -1 || library_path.indexOf("/sbin/su") != -1 || library_path.indexOf("sbin") != -1 || library_path.indexOf("su") != -1 || library_path.indexOf("xbin") != -1 || library_path.indexOf("/proc/self/net/unix") != -1 || library_path.indexOf("rootchecker2.rcd") != -1 || library_path.indexOf("/proc/self/maps") != -1 || library_path.indexOf("hook") != -1 || library_path.indexOf("stat") != -1 || library_path.indexOf("/proc/self/maps") != -1) {
+	
+	//if(library_path.indexOf("/sbin/su") != -1 || library_path.indexOf("/sbin/.magisk") != -1 || library_path.indexOf("/sbin/magiskinit") != -1 || library_path.indexOf("/sbin/.core") != -1 || library_path.indexOf("/magisk/.core/bin/su") != -1) {
+	
+		//console.log("\x1b[33m\n Mem Copy Call ");
+      //  Memory.protect(args[0], 16, 'rwx');
+		
+        //Memory.writeUtf8String(args[0], "ffffff");
+		
+		//console.log(Memory.readUtf8String(args[0]));
+		
+		//console.log(library_path);
+		//console.log("[S] frida bypass ");
+		//console.log("\x1b[32m\nBackyutrace:\n" + Thread.backtrace(this.context, Backtracer.ACCURATE).map(DebugSymbol.fromAddress).join("\n"));
+		
+    //}
+		
+   },
+    onLeave: function(retval){
+		
+}});
+*/
+
+
+Interceptor.attach(Module.findExportByName(null, 'fopen'), {
+   onEnter: function(args) {
+	//console.log("exit : "+Memory.readCString(args[0]));
+	var library_path = Memory.readCString(args[0]);
+	Memory.protect(args[0], 16, 'rwx');
+    console.log(Memory.readUtf8String(args[0]));
+    //if(library_path.indexOf("frida") != -1 || library_path.indexOf("/sbin/su") != -1 || library_path.indexOf("magisk") != -1) {
+	//if(library_path.indexOf("frida") != -1 || library_path.indexOf("/sbin/su") != -1 || library_path.indexOf("sbin") != -1 || library_path.indexOf("su") != -1 || library_path.indexOf("xbin") != -1 || library_path.indexOf("/proc/self/net/unix") != -1 || library_path.indexOf("rootchecker2.rcd") != -1 || library_path.indexOf("/proc/self/maps") != -1 || library_path.indexOf("hook") != -1 || library_path.indexOf("stat") != -1 || library_path.indexOf("/proc/self/maps") != -1) {
+	
+	if(library_path.indexOf("/sbin/su") != -1 || library_path.indexOf("/sbin/magisk") != -1 || library_path.indexOf("/sbin/.magisk") != -1 || library_path.indexOf("/sbin/magiskinit") != -1) {
+	
+		//console.log("\x1b[33m\n Mem Copy Call ");
+        
+		//Memory.protect(args[0], 16, 'rwx');
+        Memory.writeUtf8String(args[0], "ffffff");
+		
+		//console.log(Memory.readUtf8String(args[0]));
+		
+		//console.log(library_path);
+		//console.log("[S] frida bypass ");
+		//console.log("\x1b[32m\nBackyutrace:\n" + Thread.backtrace(this.context, Backtracer.ACCURATE).map(DebugSymbol.fromAddress).join("\n"));
+		
+    }
+	//Memory.protect(args[0], 16, 'rwx');
+	console.log(Memory.readUtf8String(args[0]));
+		
+   },
+    onLeave: function(retval){
+		
+}});
+
+
+/*
+Java.perform(function () {
+	var test = Java.use("androidx.appcompat.app.AppCompatActivity");
+	test.appCompatActivity.implementation = function(){
+		console.log("1111111111111111111111111");
+		return NULL;
+	}
+})
+*/
+/*
+Interceptor.attach(Module.findExportByName(null, 'openat'), {
+   onEnter: function(args) {
+	//console.log("exit : "+Memory.readCString(args[0]));
+	var library_path = Memory.readCString(args[1]);
+	Memory.protect(args[1], 16, 'rwx');
+    console.log(Memory.readUtf8String(args[1]));
+	
+    //if(library_path.indexOf("frida") != -1 || library_path.indexOf("/sbin/su") != -1 || library_path.indexOf("magisk") != -1) {
+	//if(library_path.indexOf("frida") != -1 || library_path.indexOf("/sbin/su") != -1 || library_path.indexOf("sbin") != -1 || library_path.indexOf("su") != -1 || library_path.indexOf("xbin") != -1 || library_path.indexOf("/proc/self/net/unix") != -1 || library_path.indexOf("rootchecker2.rcd") != -1 || library_path.indexOf("/proc/self/maps") != -1 || library_path.indexOf("hook") != -1 || library_path.indexOf("stat") != -1 || library_path.indexOf("/proc/self/maps") != -1) {
+	
+	//if(library_path.indexOf("/sbin/su") != -1 || library_path.indexOf("/sbin/.magisk") != -1 || library_path.indexOf("/sbin/magiskinit") != -1 || library_path.indexOf("/sbin/.core") != -1 || library_path.indexOf("/magisk/.core/bin/su") != -1) {
+	
+		//console.log("\x1b[33m\n Mem Copy Call ");
+        //Memory.protect(args[1], 16, 'rwx');
+		
+        //Memory.writeUtf8String(args[1], "ffffff");
+		
+		//console.log(Memory.readUtf8String(args[1]));
+		
+		//console.log(library_path);
+		//console.log("[S] frida bypass ");
+		//console.log("\x1b[32m\nBackyutrace:\n" + Thread.backtrace(this.context, Backtracer.ACCURATE).map(DebugSymbol.fromAddress).join("\n"));
+		
+    //}
+		
+   },
+    onLeave: function(retval){
+		
+}});
+*/
+/*
+var base = Module.findBaseAddress("libdxbase.so");
+var add_base = base.add(0x7f8c);
+
+Interceptor.replace(add_base, new nativeCallback(function(){
+	console.log("[.] replace void");
+	
+}, "void", []));
+*/
+
+Interceptor.attach(Module.findExportByName(null, 'kill'), {
+   onEnter: function(args) {
+	console.log('[*][*][*][*][*][*][*][*][*][*][*][*][*] KILL Call ');
+	args[0] = ptr(0x1234);
+	
+	//Thread.sleep(100);
+	
+	//console.log("\x1b[32m\nBackyutrace:\n" + Thread.backtrace(this.context, Backtracer.ACCURATE).map(DebugSymbol.fromAddress).join("\n"));
+
+   },
+    onLeave: function(retval){
+   }
+
+});
+
+/*
+Interceptor.attach(Module.findExportByName(null, 'kill'), {
+   onEnter: function(args) {
+	console.log('[*][*][*][*][*][*][*][*][*][*][*][*][*] KILL Call ');
+	args[0] = ptr(0x1234);
+	Thread.sleep(5);
+	console.log("\x1b[32m\nBackyutrace:\n" + Thread.backtrace(this.context, Backtracer.ACCURATE).map(DebugSymbol.fromAddress).join("\n"));
+
+   },
+    onLeave: function(retval){
+   }
+
+})
+*/
+
+Interceptor.attach(Module.findExportByName(null, 'exit'), {
+   onEnter: function(args) {
+	console.log('[*][*][*][*][*][*][*][*][*][*][*][*][*] EXIT Call ');
+	Thread.sleep(5);
+	//console.log("\x1b[32m\nBackyutrace:\n" + Thread.backtrace(this.context, Backtracer.ACCURATE).map(DebugSymbol.fromAddress).join("\n"));
+
+   },
+    onLeave: function(retval){
+   }
+
+})
