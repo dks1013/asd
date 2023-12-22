@@ -1,0 +1,56 @@
+def open_ida_file():
+    ida_data = open("./qqqq.txt", "r")
+    result = []
+    for line in ida_data:
+        result.append(line.split())
+        #print(line)
+    #print(result)
+    return result
+def sub_filter(ida_list):
+    sub_list = []
+    for line in ida_list:
+        if "sub_" in line[0]:
+            if "nullsub_" not in line[0]:
+                sub_list.append(line[0])
+                #print(line[0])
+    return sub_list
+def sub_filter2(ida_list):
+    sub_list = []
+    for line in ida_list:
+        if "sub_" in line[3]:
+            if "nullsub_" not in line[3]:
+                sub_list.append(line[3])
+                #print(line[2])
+    return sub_list    
+#'004E1B20'
+def create_sub_hook(sub_list):
+    tmp_list = []
+    tmpp = []
+    result_sub = []
+ #   result_code = []
+    for index in sub_list:
+        tmp_list = index.split("sub_")
+        tmpp.append(tmp_list[1])
+    for index in tmpp:
+        #필터 잘못 검 모든 문자열에서 0이 사라짐
+        #result_sub.append(re.sub('[^1-9A-Z]', '', index))
+        result_sub.append(index.lstrip('0'))
+    save_hook = open('all_method_hook.js', 'w')
+    for index in result_sub:
+        code = "var module_base = Module.findBaseAddress('libbugsnag-ndk.so');"     #Module.findBaseAddress('XXXX')  -> ipa 압축 해제 후 바이너리 파일명으로 수정
+        code += "var custom = module_base.add("
+        code += "0x{}".format(index)
+        code += ");"
+        code += "Interceptor.attach(custom, {"
+        code += "onEnter: function (args) {"
+        code += "console.log('"
+        code += "0x{}".format(index)
+        code += " Call');"
+        code += "}"
+        code += "});"
+        save_hook.write(code + "\n")
+    save_hook.close()
+ida_list = open_ida_file()
+sub_list = sub_filter(ida_list)
+#sub_list = sub_filter2(ida_list)
+create_sub_hook(sub_list)
