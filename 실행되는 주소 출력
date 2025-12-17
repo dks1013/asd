@@ -1,24 +1,48 @@
-const lib = "libdxbase.so";
+const targetLib = "libdxbase.so";
 
-const wait = setInterval(() => {
-    const base = Module.findBaseAddress(lib);
+function startStalker() {
+    const base = Module.findBaseAddress(targetLib);
     if (!base) return;
 
-    clearInterval(wait);
-    const end = base.add(Module.getSize(lib));
-    console.log("[+] lib loaded", base);
+    const size = Module.getSize(targetLib);
+    const end  = base.add(size);
 
-    Stalker.follow(Process.getCurrentThreadId(), {
-        events: { call: true },
-        onReceive(events) {
-            Stalker.parse(events).forEach(e => {
-                if (e.type === "call") {
-                    const to = ptr(e.to);
-                    if (to.compare(base) >= 0 && to.compare(end) < 0) {
-                        console.log("[EXEC]", to.sub(base));
+    console.log("[+] start stalker", base, size);
+
+    Process.enumerateThreads().forEach(t => {
+        Stalker.follow(t.id, {
+            events: { call: true },
+            onReceive(events) {
+                Stalker.parse(events).forEach(e => {
+                    if (e.type === "call") {
+                        const to = ptr(e.to);
+                        if (to.compare(base) >= 0 && to.compare(end) < 0) {
+                            console.log("[EXEC]", to.sub(base));
+                        }
                     }
-                }
-            });
+                });
+            }
+        });
+    });
+}
+
+// 🔴 핵심: android_dlopen_ext
+const dlopenExt =
+    Module.findExportByName("libdl.so", "android_dlopen_ext") ||
+    Module.findExportByName(null, "android_dlopen_ext");
+
+if (!dlopenExt) {
+    console.log("[-] android_dlopen_ext not found");
+} else {
+    Interceptor.attach(dlopenExt, {
+        onEnter(args) {
+            this.path = args[0].readCString();
+        },
+        onLeave() {
+            if (this.path && this.path.indexOf(targetLib) !== -1) {
+                console.log("[+] libdxbase.so loaded");
+                setTimeout(startStalker, 0);
+            }
         }
     });
-}, 50);
+}
