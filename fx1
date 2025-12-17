@@ -1,0 +1,8 @@
+var base = Module.findBaseAddress("libdxbase.so");
+var target = base.add(0x12340);
+
+Interceptor.attach(target, {
+    onEnter() {
+        console.log("[+] init_array hit");
+    }
+});
