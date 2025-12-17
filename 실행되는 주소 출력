@@ -1,17 +1,34 @@
-const lib = "libdxbase.so";
-const base = Module.findBaseAddress(lib);
-const end  = base.add(Module.getSize(lib));
+Interceptor.attach(
+    Module.findExportByName(null, "dlopen"),
+    {
+        onEnter(args) {
+            this.path = args[0].readCString();
+        },
+        onLeave(retval) {
+            if (this.path && this.path.indexOf("libdxbase.so") !== -1) {
+                console.log("[+] libdxbase.so loaded");
 
-Stalker.follow(Process.getCurrentThreadId(), {
-    events: { call: true },
-    onReceive(events) {
-        Stalker.parse(events).forEach(e => {
-            if (e.type === "call") {
-                const to = ptr(e.to);
-                if (to.compare(base) >= 0 && to.compare(end) < 0) {
-                    console.log("[EXEC]", to.sub(base));
-                }
+                const lib = "libdxbase.so";
+                const base = Module.findBaseAddress(lib);
+                const size = Module.getSize(lib);
+                const end  = base.add(size);
+
+                console.log("[+] base:", base, "size:", size);
+
+                Stalker.follow(Process.getCurrentThreadId(), {
+                    events: { call: true },
+                    onReceive(events) {
+                        Stalker.parse(events).forEach(e => {
+                            if (e.type === "call") {
+                                const to = ptr(e.to);
+                                if (to.compare(base) >= 0 && to.compare(end) < 0) {
+                                    console.log("[EXEC]", to.sub(base));
+                                }
+                            }
+                        });
+                    }
+                });
             }
-        });
+        }
     }
-});
+);
