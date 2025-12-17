@@ -1,8 +1,23 @@
-var base = Module.findBaseAddress("libdxbase.so");
-var target = base.add(0x12340);
+Interceptor.attach(
+    Module.findExportByName(null, "android_dlopen_ext"),
+    {
+        onEnter(args) {
+            var path = Memory.readCString(args[0]);
+            if (path.indexOf("libdxbase.so") !== -1) {
+                this.hook = true;
+            }
+        },
+        onLeave() {
+            if (!this.hook) return;
 
-Interceptor.attach(target, {
-    onEnter() {
-        console.log("[+] init_array hit");
+            var base = Module.findBaseAddress("libdxbase.so");
+            var target = base.add(0x12340);
+
+            Interceptor.attach(target, {
+                onEnter() {
+                    console.log("[+] init_array hit");
+                }
+            });
+        }
     }
-});
+);
