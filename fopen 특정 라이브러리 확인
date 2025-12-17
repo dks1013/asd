@@ -1,12 +1,10 @@
 Interceptor.attach(
     Module.findExportByName(null, "fopen"),
     {
-        onEnter(args) {
+        onEnter() {
             var lr = this.context.lr;
             var m = Process.findModuleByAddress(lr);
-            if (m && m.name === "libdxbase.so") {
-                console.log("[+] fopen from libdxbase.so :", lr);
-            }
+            console.log("lr =", lr, "module =", m.name, "base =", m.base);
         }
     }
 );
