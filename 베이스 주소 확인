@@ -1,0 +1,2 @@
+var base = Module.findBaseAddress("libdxbase.so");
+console.log("[+] libdxbase.so base =", base);
