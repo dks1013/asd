@@ -1,0 +1,8 @@
+var fopen = Module.findExportByName(null, "_fopen");
+Interceptor.attach(fopen, {
+    onEnter: function(args) {
+        var filename = args[0].readUtf8String();
+        var mode = args[1].readUtf8String();
+        console.log("Opening file: " + filename + " with mode: " + mode);
+    }
+});
