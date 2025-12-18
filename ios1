@@ -1,0 +1,17 @@
+const base = Module.findBaseAddress("YourAppBinaryName");
+const addr = base.add(0x4F23D8);
+
+Interceptor.attach(addr, {
+    onEnter(context) {
+        const x8 = context.x8;
+        console.log("[+] X8 =", x8);
+
+        try {
+            const filenamePtr = x8.readPointer();
+            const filename = filenamePtr.readUtf8String();
+            console.log("[+] filename =", filename);
+        } catch (e) {
+            console.log("[-] read fail");
+        }
+    }
+});
