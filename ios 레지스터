@@ -1,0 +1,7 @@
+Interceptor.attach(ptr(base.add(0xOFFSET)), {
+    onEnter() {
+        Object.keys(this.context).forEach(r => {
+            console.log(r, this.context[r]);
+        });
+    }
+});
