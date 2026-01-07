@@ -1,25 +1,6 @@
-Interceptor.attach(
-  Module.getExportByName("ntdll.dll", "LdrLoadDll"),
-  {
-    onEnter(args) {
-      var name = Memory.readUtf16String(args[2]);
-      if (name && name.toLowerCase().includes("xiaddin")) {
-        console.log("[LOAD]", name);
-      }
-    },
-    onLeave() {
-      var mod = Process.enumerateModules().find(m =>
-        m.name.toLowerCase().includes("xiaddin")
-      );
-      if (mod) {
-        console.log("[FOUND]", mod.name, mod.base);
-
-        Interceptor.attach(mod.base, {
-          onEnter() {
-            console.log("[XIADDIN BASE HIT]");
-          }
-        });
-      }
-    }
+Process.enumerateModules().forEach(m => {
+  if (m.name.toLowerCase().includes("clr") ||
+      m.name.toLowerCase().includes("mscoree")) {
+    console.log(m.name);
   }
-);
+});
