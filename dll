@@ -1,6 +1,40 @@
-Process.enumerateModules().forEach(m => {
-  if (m.name.toLowerCase().includes("clr") ||
-      m.name.toLowerCase().includes("mscoree")) {
-    console.log(m.name);
+// 메모리 확보
+Interceptor.attach(
+  Module.getExportByName("kernel32.dll", "VirtualAlloc"),
+  {
+    onEnter(args) {
+      this.size = args[1].toInt32();
+    },
+    onLeave(ret) {
+      if (this.size > 0x1000) {
+        console.log("[VirtualAlloc]", ret, "size=", this.size);
+      }
+    }
   }
-});
+);
+
+// 메모리 복사
+Interceptor.attach(
+  Module.getExportByName("ntdll.dll", "RtlMoveMemory"),
+  {
+    onEnter(args) {
+      var size = args[2].toInt32();
+      if (size > 0x1000) {
+        console.log("[RtlMoveMemory]", "dst=", args[0], "size=", size);
+      }
+    }
+  }
+);
+
+// 실행권한 부여
+Interceptor.attach(
+  Module.getExportByName("kernel32.dll", "VirtualProtect"),
+  {
+    onEnter(args) {
+      var newProt = args[2].toInt32();
+      if (newProt & 0x20) { // PAGE_EXECUTE*
+        console.log("[VirtualProtect EXEC]", args[0]);
+      }
+    }
+  }
+);
