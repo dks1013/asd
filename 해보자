@@ -1,0 +1,10 @@
+// test rax, rax 주소
+const target = ptr("0x7FFC5800D70");
+
+Interceptor.attach(target, {
+  onEnter(args) {
+    // strstriw 결과 무조건 실패로
+    this.context.rax = ptr(0);
+    console.log("[+] Clipboard check bypassed");
+  }
+});
