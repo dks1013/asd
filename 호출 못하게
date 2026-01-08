@@ -1,0 +1,10 @@
+// call dsp_03_20166a.XXXX -> test eax, eax
+// 이 callee의 리턴값만 0으로 고정
+const dsp = ptr("0x7FFC19734400"); // 실행 중 동적으로 얻은 시작 주소
+
+Interceptor.attach(dsp, {
+  onLeave(retval) {
+    retval.replace(0); // eax = 0
+    console.log("[+] bypass: dsp retval -> 0");
+  }
+});
