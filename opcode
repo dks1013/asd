@@ -3,12 +3,19 @@ const ranges = Process.enumerateRangesSync({
   coalesce: true
 });
 
+// 네가 준 문맥: call + test
+// E8 AD 36 06 00 85 C0
 for (const r of ranges) {
   Memory.scan(r.base, r.size, "E8 AD 36 06 00 85 C0", {
     onMatch(addr) {
-      console.log("fffff");
-      console.log("[HIT] pattern at", addr);
-      return 'stop'; // 한 군데만
+      const testAddr = addr.add(5); // call(5바이트) 다음이 85 C0
+      Interceptor.attach(testAddr, {
+        onEnter() {
+          console.log("fffff");      // 여기서 찍힘
+        }
+      });
+      console.log("[HIT] test eax,eax at", testAddr);
+      return 'stop'; // 한 곳만
     },
     onComplete() {}
   });
