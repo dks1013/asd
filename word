@@ -1,0 +1,27 @@
+const ranges = Process.enumerateRangesSync({
+  protection: 'r-x',
+  coalesce: true
+});
+
+const pattern = "41 57 48 81 EC 40 03 00 00";
+
+for (const r of ranges) {
+  Memory.scan(r.base, r.size, pattern, {
+    onMatch(addr) {
+      console.log("[HIT] function prologue at", addr);
+
+      Interceptor.attach(addr, {
+        onEnter(args) {
+          console.log("fffff");
+
+          // 예시: 여기서 레지스터 조작 가능
+          // this.context.rsi = this.context.r14;
+          // this.context.rax = 1;
+        }
+      });
+
+      return 'stop'; // 한 군데만
+    },
+    onComplete() {}
+  });
+}
