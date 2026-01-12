@@ -1,0 +1,34 @@
+const moduleName = "target.exe";
+const base = Module.findBaseAddress(moduleName);
+if (!base) {
+    console.log("모듈 못 찾음");
+    return;
+}
+
+// IDA에서 확인한 정확한 RVA
+const dwordOffset = 0x0A3FE0;
+const dwordAddr = base.add(dwordOffset);
+
+// 실행 영역만 스캔
+const ranges = Process.enumerateRangesSync({
+    protection: 'r-x',
+    coalesce: true
+});
+
+for (const r of ranges) {
+    Memory.scan(r.base, r.size, "83 3D ?? ?? ?? ?? 01", {
+        onMatch(addr) {
+            console.log("[HIT] cmp opcode at", addr);
+
+            Interceptor.attach(addr, {
+                onEnter() {
+                    // cmp 실행 직전에 값 강제
+                    Memory.writeU32(dwordAddr, 1);
+                }
+            });
+
+            return 'stop'; // 한 군데만
+        },
+        onComplete() {}
+    });
+}
