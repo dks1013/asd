@@ -1,11 +1,35 @@
-Java.perform(function () {
-    var System = Java.use('java.lang.System');
+'use strict';
 
-    System.getProperty.overload('java.lang.String').implementation = function (key) {
-        if (key === 'http.proxyHost' || key === 'https.proxyHost') {
-            console.log('[+] Proxy check bypass: ' + key);
-            return null;
+Interceptor.attach(
+    Module.findExportByName(null, 'SSL_set_custom_verify'),
+    {
+        onEnter: function (args) {
+            console.log('[+] SSL_set_custom_verify() bypass');
+            // mode = SSL_VERIFY_NONE
+            args[1] = ptr(0);
+            // callback = NULL
+            args[2] = ptr(0);
         }
-        return this.getProperty(key);
-    };
-});
+    }
+);
+
+Interceptor.attach(
+    Module.findExportByName(null, 'SSL_CTX_set_verify'),
+    {
+        onEnter: function (args) {
+            console.log('[+] SSL_CTX_set_verify() bypass');
+            // SSL_VERIFY_NONE
+            args[1] = ptr(0);
+        }
+    }
+);
+
+Interceptor.attach(
+    Module.findExportByName(null, 'SSL_get_verify_result'),
+    {
+        onLeave: function (retval) {
+            console.log('[+] SSL_get_verify_result() forced OK');
+            retval.replace(0); // X509_V_OK
+        }
+    }
+);
