@@ -1,12 +1,11 @@
 Java.perform(function () {
-    try {
-        var OkHostnameVerifier = Java.use('okhttp3.internal.tls.OkHostnameVerifier');
-        OkHostnameVerifier.verify.overload(
-            'java.lang.String',
-            'javax.net.ssl.SSLSession'
-        ).implementation = function (host, session) {
-            console.log('[+] OkHttp Hostname verify bypass: ' + host);
-            return true;
-        };
-    } catch (e) {}
+    var System = Java.use('java.lang.System');
+
+    System.getProperty.overload('java.lang.String').implementation = function (key) {
+        if (key === 'http.proxyHost' || key === 'https.proxyHost') {
+            console.log('[+] Proxy check bypass: ' + key);
+            return null;
+        }
+        return this.getProperty(key);
+    };
 });
