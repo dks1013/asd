@@ -1,0 +1,20 @@
+from flask import Flask, request, render_template_string
+
+app = Flask(__name__)
+
+@app.route("/")
+def index():
+    q = request.args.get("q", "")
+    html = f"""
+    <h2>XSS Lab (Reflected)</h2>
+    <form method="get">
+        <input name="q">
+        <input type="submit">
+    </form>
+    결과:<br>
+    {q}
+    """
+    return render_template_string(html)
+
+if __name__ == "__main__":
+    app.run(debug=True)
