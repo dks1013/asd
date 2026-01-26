@@ -1,19 +1,25 @@
-import pandas as pd
+import csv
 import base64
 
-df = pd.read_csv("data.csv", encoding="cp949")  # ⭐ 핵심
+with open("data.csv", newline="", encoding="utf-8", errors="ignore") as infile, \
+     open("decoded.csv", "w", newline="", encoding="utf-8-sig") as outfile:
 
-def decode_base64(val):
-    try:
-        if pd.isna(val):
-            return val
-        val = str(val).replace("\n", "").replace("\r", "")
-        return base64.b64decode(val + "==").decode("utf-8", errors="ignore")
-    except Exception as e:
-        return f"ERROR"
+    reader = csv.reader(infile)
+    writer = csv.writer(outfile)
 
-df.insert(1, "decoded", df.iloc[:, 0].apply(decode_base64))
+    for row in reader:
+        if not row:
+            writer.writerow(row)
+            continue
 
-df.to_csv("decoded.csv", index=False, encoding="utf-8-sig")
+        b64 = row[0].strip().replace("\n", "").replace("\r", "")
 
-print("완료")
+        try:
+            decoded = base64.b64decode(b64 + "==").decode("utf-8", errors="ignore")
+        except:
+            decoded = ""
+
+        # A열 유지 + B열에 디코딩 추가
+        writer.writerow([row[0], decoded] + row[1:])
+
+print("완료: decoded.csv 생성됨")
