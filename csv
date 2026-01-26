@@ -1,6 +1,16 @@
 import csv
 import base64
 
+# 디코딩할 컬럼 인덱스 (D, W)
+TARGET_COLS = [3, 22]
+
+def decode_base64(val):
+    try:
+        val = val.strip().replace("\n", "").replace("\r", "")
+        return base64.b64decode(val + "==").decode("utf-8", errors="ignore")
+    except:
+        return val  # 실패하면 원본 유지
+
 with open("data.csv", newline="", encoding="utf-8", errors="ignore") as infile, \
      open("decoded.csv", "w", newline="", encoding="utf-8-sig") as outfile:
 
@@ -8,18 +18,9 @@ with open("data.csv", newline="", encoding="utf-8", errors="ignore") as infile, 
     writer = csv.writer(outfile)
 
     for row in reader:
-        if not row:
-            writer.writerow(row)
-            continue
+        for idx in TARGET_COLS:
+            if idx < len(row) and row[idx]:
+                row[idx] = decode_base64(row[idx])
+        writer.writerow(row)
 
-        b64 = row[0].strip().replace("\n", "").replace("\r", "")
-
-        try:
-            decoded = base64.b64decode(b64 + "==").decode("utf-8", errors="ignore")
-        except:
-            decoded = ""
-
-        # A열 유지 + B열에 디코딩 추가
-        writer.writerow([row[0], decoded] + row[1:])
-
-print("완료: decoded.csv 생성됨")
+print("완료: D열, W열 디코딩 끝")
