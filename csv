@@ -1,0 +1,22 @@
+import pandas as pd
+import base64
+
+# CSV 읽기
+df = pd.read_csv("data.csv")
+
+def decode_base64(val):
+    try:
+        if pd.isna(val):
+            return val
+        val = str(val).replace("\n", "")
+        return base64.b64decode(val).decode("utf-8", errors="ignore")
+    except:
+        return ""
+
+# A열 → B열(덮어쓰기 아님)
+df.insert(1, "decoded", df.iloc[:, 0].apply(decode_base64))
+
+# 결과 저장
+df.to_csv("decoded.csv", index=False, encoding="utf-8-sig")
+
+print("완료: decoded.csv 생성됨")
