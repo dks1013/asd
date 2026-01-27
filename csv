@@ -1,67 +1,64 @@
 import xmltodict
-import csv
 import base64
 import sys
 
-def get_text(value):
+def flatten_node(node):
     """
-    Burp XML에서 값 안전하게 꺼내기
-    - string -> 그대로
-    - dict (#text) -> text
-    """
-    if isinstance(value, dict):
-        return value.get('#text', '')
-    elif isinstance(value, str):
-        return value
-    return ''
-
-def decode_base64_if_needed(node):
-    """
-    base64="true" 인 경우만 디코딩
+    최신 Burp XML node(dict/string)를
+    구버전 호환 string으로 변환
     """
     if isinstance(node, dict):
         text = node.get('#text', '')
+        # base64면 디코딩 후 다시 인코딩 (구버전 호환)
         if node.get('@base64') == 'true':
             try:
-                return base64.b64decode(text).decode('utf-8', errors='replace')
+                decoded = base64.b64decode(text)
+                return base64.b64encode(decoded).decode()
             except Exception:
                 return text
         return text
-    return node or ''
+    elif isinstance(node, str):
+        return node
+    return ''
 
-def main(xml_file, out_file):
-    with open(xml_file, 'r', encoding='utf-8', errors='ignore') as f:
+def main(src, dst):
+    with open(src, 'r', encoding='utf-8', errors='ignore') as f:
         data = xmltodict.parse(f.read())
 
     items = data.get('items', {}).get('item', [])
-
-    # item 하나일 때 list로 보정
     if isinstance(items, dict):
         items = [items]
 
-    with open(out_file, 'w', newline='', encoding='utf-8') as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerow(['time', 'method', 'url', 'status', 'request', 'response'])
+    old_items = []
 
-        for item in items:
-            if not isinstance(item, dict):
-                continue
+    for item in items:
+        if not isinstance(item, dict):
+            continue
 
-            time = get_text(item.get('time'))
-            method = get_text(item.get('method'))
-            url = get_text(item.get('url'))
-            status = get_text(item.get('status'))
+        old_item = {}
 
-            request = decode_base64_if_needed(item.get('request'))
-            response = decode_base64_if_needed(item.get('response'))
+        for key, value in item.items():
+            if key in ('request', 'response'):
+                old_item[key] = flatten_node(value)
+            else:
+                old_item[key] = flatten_node(value)
 
-            writer.writerow([time, method, url, status, request, response])
+        old_items.append(old_item)
 
-    print(f'[+] Done: {out_file}')
+    old_xml = {
+        'items': {
+            'item': old_items
+        }
+    }
+
+    with open(dst, 'w', encoding='utf-8') as f:
+        f.write(xmltodict.unparse(old_xml, pretty=True))
+
+    print(f'[+] Converted to old-style Burp XML: {dst}')
 
 if __name__ == '__main__':
     if len(sys.argv) != 3:
-        print(f'Usage: python3 {sys.argv[0]} burp.xml output.csv')
+        print(f'Usage: python3 {sys.argv[0]} new.xml old.xml')
         sys.exit(1)
 
     main(sys.argv[1], sys.argv[2])
