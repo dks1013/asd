@@ -2,46 +2,41 @@ import xmltodict
 import base64
 import sys
 
-def flatten_node(node):
+def force_string(value):
     """
-    최신 Burp XML node(dict/string)를
-    구버전 호환 string으로 변환
+    어떤 타입이든 무조건 string으로 변환
     """
-    if isinstance(node, dict):
-        text = node.get('#text', '')
-        # base64면 디코딩 후 다시 인코딩 (구버전 호환)
-        if node.get('@base64') == 'true':
-            try:
-                decoded = base64.b64decode(text)
-                return base64.b64encode(decoded).decode()
-            except Exception:
-                return text
-        return text
-    elif isinstance(node, str):
-        return node
+    if isinstance(value, dict):
+        # base64 노드
+        if '#text' in value:
+            text = value.get('#text', '')
+            return text
+        return ''
+    elif isinstance(value, list):
+        return ''
+    elif isinstance(value, str):
+        return value
     return ''
 
 def main(src, dst):
     with open(src, 'r', encoding='utf-8', errors='ignore') as f:
         data = xmltodict.parse(f.read())
 
-    items = data.get('items', {}).get('item', [])
-    if isinstance(items, dict):
-        items = [items]
+    raw_items = data.get('items', {}).get('item', [])
+
+    # item 1개 대응
+    if isinstance(raw_items, dict):
+        raw_items = [raw_items]
 
     old_items = []
 
-    for item in items:
+    for item in raw_items:
         if not isinstance(item, dict):
             continue
 
         old_item = {}
-
         for key, value in item.items():
-            if key in ('request', 'response'):
-                old_item[key] = flatten_node(value)
-            else:
-                old_item[key] = flatten_node(value)
+            old_item[key] = force_string(value)
 
         old_items.append(old_item)
 
@@ -54,7 +49,7 @@ def main(src, dst):
     with open(dst, 'w', encoding='utf-8') as f:
         f.write(xmltodict.unparse(old_xml, pretty=True))
 
-    print(f'[+] Converted to old-style Burp XML: {dst}')
+    print(f'[+] REALLY old-style XML created: {dst}')
 
 if __name__ == '__main__':
     if len(sys.argv) != 3:
