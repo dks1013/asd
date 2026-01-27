@@ -1,26 +1,67 @@
+import xmltodict
 import csv
 import base64
+import sys
 
-# 디코딩할 컬럼 인덱스 (D, W)
-TARGET_COLS = [3, 22]
+def get_text(value):
+    """
+    Burp XML에서 값 안전하게 꺼내기
+    - string -> 그대로
+    - dict (#text) -> text
+    """
+    if isinstance(value, dict):
+        return value.get('#text', '')
+    elif isinstance(value, str):
+        return value
+    return ''
 
-def decode_base64(val):
-    try:
-        val = val.strip().replace("\n", "").replace("\r", "")
-        return base64.b64decode(val + "==").decode("utf-8", errors="ignore")
-    except:
-        return val  # 실패하면 원본 유지
+def decode_base64_if_needed(node):
+    """
+    base64="true" 인 경우만 디코딩
+    """
+    if isinstance(node, dict):
+        text = node.get('#text', '')
+        if node.get('@base64') == 'true':
+            try:
+                return base64.b64decode(text).decode('utf-8', errors='replace')
+            except Exception:
+                return text
+        return text
+    return node or ''
 
-with open("data.csv", newline="", encoding="utf-8", errors="ignore") as infile, \
-     open("decoded.csv", "w", newline="", encoding="utf-8-sig") as outfile:
+def main(xml_file, out_file):
+    with open(xml_file, 'r', encoding='utf-8', errors='ignore') as f:
+        data = xmltodict.parse(f.read())
 
-    reader = csv.reader(infile)
-    writer = csv.writer(outfile)
+    items = data.get('items', {}).get('item', [])
 
-    for row in reader:
-        for idx in TARGET_COLS:
-            if idx < len(row) and row[idx]:
-                row[idx] = decode_base64(row[idx])
-        writer.writerow(row)
+    # item 하나일 때 list로 보정
+    if isinstance(items, dict):
+        items = [items]
 
-print("완료: D열, W열 디코딩 끝")
+    with open(out_file, 'w', newline='', encoding='utf-8') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(['time', 'method', 'url', 'status', 'request', 'response'])
+
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+
+            time = get_text(item.get('time'))
+            method = get_text(item.get('method'))
+            url = get_text(item.get('url'))
+            status = get_text(item.get('status'))
+
+            request = decode_base64_if_needed(item.get('request'))
+            response = decode_base64_if_needed(item.get('response'))
+
+            writer.writerow([time, method, url, status, request, response])
+
+    print(f'[+] Done: {out_file}')
+
+if __name__ == '__main__':
+    if len(sys.argv) != 3:
+        print(f'Usage: python3 {sys.argv[0]} burp.xml output.csv')
+        sys.exit(1)
+
+    main(sys.argv[1], sys.argv[2])
