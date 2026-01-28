@@ -1,0 +1,93 @@
+import xml.etree.ElementTree as ET
+import base64
+import csv
+import datetime
+import sys
+
+def iso_to_epoch_ms(iso_time):
+    try:
+        dt = datetime.datetime.fromisoformat(iso_time.replace("Z", "+00:00"))
+        return int(dt.timestamp() * 1000)
+    except:
+        return ""
+
+def decode_if_base64(text, is_base64):
+    if text is None:
+        return ""
+    if is_base64:
+        try:
+            return base64.b64decode(text).decode(errors="replace")
+        except:
+            return ""
+    return text
+
+def parse_old_item(item):
+    return {
+        "time": item.findtext("time", ""),
+        "method": item.findtext("method", ""),
+        "url": item.findtext("url", ""),
+        "host": item.findtext("host", ""),
+        "request": decode_if_base64(
+            item.findtext("request"),
+            item.find("request") is not None and item.find("request").attrib.get("base64") == "true"
+        ),
+        "response": decode_if_base64(
+            item.findtext("response"),
+            item.find("response") is not None and item.find("response").attrib.get("base64") == "true"
+        ),
+    }
+
+def parse_new_entry(entry):
+    req = entry.find("request")
+    res = entry.find("response")
+
+    url = req.findtext("url", "") if req is not None else ""
+    method = req.findtext("method", "") if req is not None else ""
+
+    return {
+        "time": iso_to_epoch_ms(entry.findtext("startedDateTime", "")),
+        "method": method,
+        "url": url,
+        "host": "",
+        "request": ET.tostring(req, encoding="unicode") if req is not None else "",
+        "response": ET.tostring(res, encoding="unicode") if res is not None else "",
+    }
+
+def main():
+    if len(sys.argv) != 2:
+        print("Usage: python convert-burp-suite-http-proxy-history-to-csv-patched.py input.xml")
+        sys.exit(1)
+
+    tree = ET.parse(sys.argv[1])
+    root = tree.getroot()
+
+    rows = []
+
+    # ✅ 구버전 Burp
+    items = root.findall(".//item")
+    if items and items[0].find("time") is not None:
+        for item in items:
+            rows.append(parse_old_item(item))
+
+    # ✅ 최신 Burp
+    else:
+        for entry in root.findall(".//entry"):
+            rows.append(parse_new_entry(entry))
+
+    with open("output.csv", "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["time", "method", "url", "host", "request", "response"])
+        for r in rows:
+            writer.writerow([
+                r["time"],
+                r["method"],
+                r["url"],
+                r["host"],
+                r["request"],
+                r["response"]
+            ])
+
+    print("[+] Converted successfully → output.csv")
+
+if __name__ == "__main__":
+    main()
